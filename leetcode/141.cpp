@@ -24,3 +24,20 @@ public:
         return false;
     }
 };
+
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        ListNode *one, *two;
+        one = head, two = head;
+
+        while (two && two->next) {
+            one = one->next;
+            two = two->next->next;
+            
+            if (one == two) return true;
+        }
+        
+        return false;
+    }
+};
