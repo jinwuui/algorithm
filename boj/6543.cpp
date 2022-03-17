@@ -19,35 +19,31 @@ const int MOD = 1000000007;
 
 int n, m;
 vector<int> vis(5555);
-vector<vector<int>> eg(111111, vector<int>());
-vector<vector<int>> ge(111111, vector<int>());
-stack<int> stk;
 
-void dfs(int s) {
-	for (int i = 0; i < eg[s].size(); i++) {
-		int cur = eg[s][i];
-		ge[cur].push_back(s);
+void dfs(int s, vector<vector<int>> &edge, vector<vector<int>> &rev, stack<int> &stk) {
+	for (int i = 0; i < edge[s].size(); i++) {
+		int cur = edge[s][i];
+		rev[cur].push_back(s);
 		
 		if (vis[cur]) continue;
 
 		vis[cur] = 1;
-		dfs(s);
+		dfs(cur, edge, rev, stk);
 	}
 
 	stk.push(s);
 }
 
-int first;
-bool isOk;
-void dfs2(int s) {
-	for (int i = 0; i < ge[s].size(); i++) {
-		int cur = ge[s][i];
+void dfs2(int boss, int s, vector<vector<int>> &rev, vector<int> &ans) {
+	for (int i = 0; i < rev[s].size(); i++) {
+		int cur = rev[s][i];
 
-		if (first == cur) isOk = true;
+		if (vis[cur] == boss) ans[cur]++;
 		if (vis[cur]) continue;
 
-		vis[cur] = 1;
-		dfs2(s);
+		vis[cur] = boss;
+		ans[cur]++;
+		dfs2(boss, cur, rev, ans);
 	}
 }
 
@@ -58,49 +54,43 @@ int main() {
 	while (1) {
 		cin >> n;
 		if (n == 0) break;
+		fill(vis.begin(), vis.end(), 0);
 		cin >> m;
 
+		vector<vector<int>> edge(n + 1, vector<int>());
+		vector<vector<int>> rev(n + 1, vector<int>());
+		stack<int> stk;
 		for (int i = 0; i < m; i++) {
 			int a, b;
 			cin >> a >> b;
 
-			eg[a].push_back(b);
+			edge[a].push_back(b);
 		}
 
 		for (int i = 1; i <= n; i++) {
 			if (vis[i]) continue;
 
 			vis[i] = 1;
-			dfs(i);
+			dfs(i, edge, rev, stk);
 		}
 		
-		vector<int> ans(n + 1);
-		iota(ans.begin(), ans.end(), 0);
-		// for (int i = 0; i < ans.size(); i++) {
-		// 	cout << ans[i] << sp;
-		// }
-		// cout << endl;
+		fill(vis.begin(), vis.end(), 0);
+		vector<int> ans(n + 1, 0);
 		while (stk.size()) {
-			fill(vis.begin(), vis.end(), 0);
-			int s = stk.top();
-			cout << "s " << s << endl;
-			stk.pop();
+			int s = stk.top(); stk.pop();
 
 			if (vis[s]) continue;
 
-			first = s;
-			isOk = false;
-			vis[s] = 1;
-			dfs2(s);
-
-			if (isOk == false) {
-				ans[s] = 0;
-			}
+			vis[s] = s;
+			dfs2(s, s, rev, ans);
 		}
 
-		sort(ans.begin(), ans.end());
+		set<int> fail;
 		for (int i = 1; i <= n; i++) {
-			if (ans[i]) cout << i << sp;
+			if (ans[i] != edge[i].size()) fail.insert(vis[i]);
+		}
+		for (int i = 1; i <= n; i++) {
+			if (fail.find(vis[i]) == fail.end()) cout << i << sp;
 		}
 		cout << endl;
 	}
