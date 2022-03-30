@@ -55,26 +55,33 @@ int main() {
 	for (int i = n - 1; i >= 0; i--) {
 		int tmp; cin >> tmp;
 		buf[i] = {tmp, i};
+		cout << tmp << ", " << i << endl;
 	}
 	cin >> k;
 	sort(buf.begin(), buf.end());
+	cout << "--d-fs-df-s" << endl;
 
-	// get disable comb
-	pii cur = buf[0];
-	for (int i = 1; i < n; i++) {
-		pii comp = buf[i];
-		if (cur.second < comp.second) {
-			int lval = max(cur.second, comp.second), rval = min(cur.second, comp.second), half = n - n / 2;
+	// pii cur = buf[0];
+	for (int i = 0; i < n - 1; i++) {
+		pii cur = buf[i];
+		for (int j = i + 1; j < n; j++) {
+			pii comp = buf[j];
+			if (cur.second < comp.second) {
+				cout << cur.first << "," << cur.second << "    " << comp.first << "," << comp.second << endl;
+				int lval = max(cur.second, comp.second), rval = min(cur.second, comp.second), half = n - n / 2;
+			
+				if (lval >= half && rval >= half) { // lnot
+					lnot.push_back((1 << (lval - half)) | (1 << (rval - half)));
+				} else if (lval < half && rval < half) { // rnot
+					rnot.push_back((1 << lval) | (1 << rval));
+				} else { // mnot
+					mnot.push_back({1 << lval, 1 << rval});
+				}
+			} else
+				cur = comp;
+		}
+		// pii comp = buf[i];
 		
-			if (lval >= half && rval >= half) { // lnot
-				lnot.push_back((1 << (lval - half)) | (1 << (rval - half)));
-			} else if (lval < half && rval < half) { // rnot
-				rnot.push_back((1 << lval) | (1 << rval));
-			} else { // mnot
-				mnot.push_back({1 << lval, 1 << rval});
-			}
-		} else
-			cur = comp;
 	}
 
 	cout << "l mask " << lnot.size() << endl;
@@ -87,33 +94,79 @@ int main() {
 		debug(rnot[i], n - n / 2);
 	}
 	cout << "- - - -- \n";
+		cout << "m mask " << mnot.size() << endl;
+	for (int i = 0; i < mnot.size(); i++) {
+		cout << mnot[i].first << sp << mnot[i].second << endl;
+		int mask = mnot[i].first + mnot[i].second;
+		debug(mask, n);
+		// debug(mnot[i].first, n / 2);
+		// debug(mnot[i].second, n - n / 2);
+	}
+	cout << "- - - -- \n";
 	solve(0, 0, n / 2, lnot, lm);
-	cout << " &^%*&^%*^%$%(&*^()*&^6" << endl;
+	// cout << " &^%*&^%*^%$%(&*^()*&^6" << endl;
 	solve(0, 0, n - n / 2, rnot, rm);
 
 	int ans = 0;
 	for (int i = 0; i < lm.size(); i++) {
-		for (int j = 0; j < mnot.size(); i++) {
-			int cnt = rm.size();
-			if ((mnot[j].first & lm[i]) == mont[j].first) {
+		int cnt = rm.size();
+		cout << "cnt " << cnt << endl;
+		for (int j = 0; j < mnot.size(); j++) {
+			if ((mnot[j].first & lm[i]) == mnot[j].first) {
+				// cout << "checkmate" << endl;
 				int s = mnot[j].second, e = 0, idx = 0;
 				while (!(s & e)) {
 					e |= (1 << idx++);
 				}
 
 				cnt -= (upper_bound(rm.begin(), rm.end(), e) - lower_bound(rm.begin(), rm.end(), s));
-				cout << "cnt " << cnt << endl;
+				// cout << "cnt " << cnt << endl;
 			}
-			
-			if (ans + cnt >= k) {
-				for (int ii = 0; ii < rm.size(); ii++) {
-					
-				}
-			} else ans += cnt;
-			cout << "ans " << ans << endl;
 		}
+		if (ans + cnt >= k) {
+			int llen, rlen;
+			llen = n / 2;
+			rlen = n - llen;
+			for (int ii = 0; ii < rm.size(); ii++) {
+				int mask = (lm[i] << (n - n / 2)) | rm[ii];
+				cout << " testteset ";
+				debug(lm[i], n / 2);
+				cout << endl;
+				cout << " testteset2 ";
+				debug(mask, n);
+				cout << endl;
+				// cout << "mask " << mask << " lm[i] " << lm[i] << " rm[ii] " << rm[ii] <<  endl;
+				// debug(lm[i], n / 2);
+				// debug(rm[ii], n - n / 2);
+				// cout << endl;
+				bool isOk = true;
+				for (int jj = 0; jj < mnot.size(); jj++) {
+					int cant = mnot[jj].first | mnot[jj].second;
+					cout << "cant -==-=-=-";
+					debug(cant, n);
+					cout << endl;
+					if ((mask & cant) == cant) {
+						isOk = false;
+						break;
+					}
+				}
+				if (isOk) {
+					ans++;
+					debug(mask, n);
+					cout << endl;
+					if (ans == k) {
+						cout << "mask " << mask << endl;
+						return 0;
+					}
+				}
+			}
+		} else ans += cnt;
+		// cout << "ans " << ans << endl;
+
 	}
 
+	cout << -1;
+	// cout << ans;
 	return 0;
 }
 /*
