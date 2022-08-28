@@ -1,3 +1,5 @@
 template/
 *.out
+*.exe
+*.txt
 tempCodeRunnerFile.cpp
