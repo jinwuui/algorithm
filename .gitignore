@@ -2,4 +2,5 @@ template/
 *.out
 *.exe
 *.txt
+.DS_Store
 tempCodeRunnerFile.cpp
