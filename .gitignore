@@ -4,3 +4,4 @@ template/
 *.txt
 .DS_Store
 tempCodeRunnerFile.cpp
+.vscode/
